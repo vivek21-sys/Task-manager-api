@@ -53,10 +53,10 @@ router.post("/add", [mdw.is_logged_in], async (req, res) => {
 });
 
 // Update User
-router.post("/update", [mdw.is_logged_in], async (req, res) => {
-    let uid = req.user.id;
+router.post("/update/:id", [mdw.is_logged_in], async (req, res) => {
     let u = req.body;
-    if (!u.id || !u.fname || !u.lname || !u.username || !u.email) {
+    let uid =req.params.id;
+    if (!u.fname || !u.lname || !u.username || !u.email) {
         return res.json({
             ok: false,
             msg: "All data is mandatory",
@@ -65,7 +65,6 @@ router.post("/update", [mdw.is_logged_in], async (req, res) => {
 
     let data = await db.executeProcedure("sp_user_update", [
         uid,
-        u.id,
         u.fname,
         u.lname,
         u.username,
@@ -79,9 +78,8 @@ router.post("/update", [mdw.is_logged_in], async (req, res) => {
 
 // Remove User
 router.post("/remove/:id", [mdw.is_logged_in], async (req, res) => {
-    let uid = req.user.id;
     let id = req.params.id;
-    let data = await db.executeProcedure("sp_user_remove", [uid, id]);
+    let data = await db.executeProcedure("sp_user_remove", [id]);
     res.json({
         ok: true,
         msg: "Removed successfully",
@@ -92,10 +90,10 @@ router.post("/remove/:id", [mdw.is_logged_in], async (req, res) => {
 router.post("/search", [mdw.is_logged_in], async (req, res) => {
     let u = req.body;
     let data = await db.executeProcedure("sp_user_search", [
-        req.user.ln || "en",
         u.fname || "",
         u.lname || "",
         u.email || "",
+        u.username ||"",
         u.phone || "",
         u.rc || 10,
         u.page || 1,
